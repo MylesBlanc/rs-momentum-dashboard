@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RS Momentum Dashboard – v1</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a2332;
+      --border: #2d3a4f;
+      --text: #e7ecf3;
+      --muted: #8b9cb3;
+      --accent: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #eab308;
+      --orange: #f97316;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    header .badge {
+      background: var(--accent);
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .status-bar {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .status-bar span strong { color: var(--text); }
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.5rem;
+    }
+    @media (max-width: 960px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-header h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .card-body { padding: 1.25rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th {
+      text-align: left;
+      color: var(--muted);
+      font-weight: 500;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid rgba(45, 58, 79, 0.5);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(59, 130, 246, 0.06); }
+    .rank {
+      font-weight: 600;
+      color: var(--accent);
+      width: 2rem;
+    }
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .tag-pass { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+    .tag-fail { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+    .tag-sector { background: rgba(59, 130, 246, 0.12); color: #60a5fa; }
+    .regime-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .regime-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0.9rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .regime-value {
+      font-weight: 600;
+    }
+    .regime-on { color: var(--green); }
+    .regime-off { color: var(--red); }
+    .regime-neutral { color: var(--yellow); }
+    .params-list {
+      list-style: none;
+      font-size: 0.875rem;
+    }
+    .params-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid rgba(45, 58, 79, 0.4);
+    }
+    .params-list li:last-child { border-bottom: none; }
+    .params-list span:last-child {
+      font-weight: 500;
+      color: var(--text);
+    }
+    .note {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: rgba(234, 179, 8, 0.08);
+      border: 1px solid rgba(234, 179, 8, 0.25);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #fbbf24;
+    }
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+    .mock-banner {
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      color: #fb923c;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <h1>RS Momentum Dashboard</h1>
+      <span class="badge">v1 LOCKED</span>
+    </div>
+    <div class="status-bar">
+      <span>Regime: <strong class="regime-on" id="regime-status">Risk-On</strong></span>
+      <span>Rebalance: <strong>Every 5 days</strong></span>
+      <span>Holdings: <strong>Top 8</strong></span>
+    </div>
+  </header>
+
+  <main>
+    <div class="mock-banner">
+      Demo mode — sample data only. Connect your live feed / ranking engine to replace the mock shortlist.
+    </div>
+
+    <div class="grid">
+      <!-- Main shortlist -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Weekly RS Shortlist (Research Ranked)</h2>
+          <span style="font-size:0.8rem;color:var(--muted);">10-day RS · Filters applied</span>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ticker</th>
+                <th>Name</th>
+                <th>Sector</th>
+                <th>10D RS</th>
+                <th>5D Trend</th>
+                <th>Vol vs Avg</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="shortlist-body">
+              <!-- Filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div style="display:flex;flex-direction:column;gap:1.5rem;">
+        <!-- Regime -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Macro Regime</h2>
+          </div>
+          <div class="card-body">
+            <div class="regime-box">
+              <div class="regime-item">
+                <span>Equity Risk</span>
+                <span class="regime-value regime-on">Risk-On</span>
+              </div>
+              <div class="regime-item">
+                <span>Rates</span>
+                <span class="regime-value regime-neutral">Neutral</span>
+              </div>
+              <div class="regime-item">
+                <span>USD</span>
+                <span class="regime-value regime-neutral">Neutral</span>
+              </div>
+              <div class="regime-item">
+                <span>Overall</span>
+                <span class="regime-value regime-on">ALLOW LONGS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Locked Params -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Locked Parameters</h2>
+          </div>
+          <div class="card-body">
+            <ul class="params-list">
+              <li><span>Signal</span><span>10D RS</span></li>
+              <li><span>Holdings</span><span>Top 8</span></li>
+              <li><span>Max / Sector</span><span>3</span></li>
+              <li><span>Rebalance</span><span>5 trading days</span></li>
+              <li><span>Exit Rank</span><span>Top 12</span></li>
+              <li><span>Time Stop</span><span>6 weeks</span></li>
+              <li><span>Weighting</span><span>Equal</span></li>
+              <li><span>Vol Filter</span><span>&gt; 20D avg</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Research list only.</strong> Do not treat the top ranks as automatic buy signals.  
+      Always apply the full rule set (filters + regime + risk limits) and your own risk management before any live capital.
+    </div>
+  </main>
+
+  <footer>
+    RS Momentum Dashboard v1 · Parameters locked 2026-11-17 · Not financial advice
+  </footer>
+
+  <script>
+    // Sample / mock data – replace with live ranking engine output
+    const sampleData = [
+      { rank: 1, ticker: "NVDA", name: "NVIDIA", sector: "Tech", rs: 8.4, trend: "Up", vol: 1.8, pass: true },
+      { rank: 2, ticker: "AVGO", name: "Broadcom", sector: "Tech", rs: 6.9, trend: "Up", vol: 1.4, pass: true },
+      { rank: 3, ticker: "0700.HK", name: "Tencent", sector: "Comm", rs: 5.7, trend: "Up", vol: 1.3, pass: true },
+      { rank: 4, ticker: "META", name: "Meta Platforms", sector: "Comm", rs: 5.1, trend: "Up", vol: 1.1, pass: true },
+      { rank: 5, ticker: "1211.HK", name: "BYD", sector: "Auto", rs: 4.8, trend: "Up", vol: 1.6, pass: true },
+      { rank: 6, ticker: "LLY", name: "Eli Lilly", sector: "Health", rs: 4.2, trend: "Up", vol: 0.9, pass: false },
+      { rank: 7, ticker: "TSLA", name: "Tesla", sector: "Auto", rs: 3.9, trend: "Flat", vol: 1.9, pass: false },
+      { rank: 8, ticker: "D05.SI", name: "DBS", sector: "Financials", rs: 3.5, trend: "Up", vol: 1.2, pass: true },
+      { rank: 9, ticker: "AAPL", name: "Apple", sector: "Tech", rs: 3.1, trend: "Up", vol: 0.8, pass: false },
+      { rank: 10, ticker: "0388.HK", name: "HKEX", sector: "Financials", rs: 2.8, trend: "Up", vol: 1.1, pass: true },
+      { rank: 11, ticker: "MSFT", name: "Microsoft", sector: "Tech", rs: 2.4, trend: "Up", vol: 0.95, pass: false },
+      { rank: 12, ticker: "0992.HK", name: "Lenovo", sector: "Tech", rs: 2.1, trend: "Down", vol: 1.5, pass: false },
+    ];
+
+    const tbody = document.getElementById('shortlist-body');
+    sampleData.forEach(row => {
+      const tr = document.createElement('tr');
+      const rsClass = row.rs >= 0 ? 'positive' : 'negative';
+      const trendClass = row.trend === 'Up' ? 'positive' : (row.trend === 'Down' ? 'negative' : '');
+      const volClass = row.vol > 1 ? 'positive' : 'negative';
+      const statusTag = row.pass
+        ? '<span class="tag tag-pass">Eligible</span>'
+        : '<span class="tag tag-fail">Filtered</span>';
+
+      tr.innerHTML = `
+        <td class="rank">${row.rank}</td>
+        <td><strong>${row.ticker}</strong></td>
+        <td>${row.name}</td>
+        <td><span class="tag tag-sector">${row.sector}</span></td>
+        <td class="${rsClass}">${row.rs > 0 ? '+' : ''}${row.rs.toFixed(1)}%</td>
+        <td class="${trendClass}">${row.trend}</td>
+        <td class="${volClass}">${row.vol.toFixed(1)}x</td>
+        <td>${statusTag}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  </script>
+</body>
+</html>
